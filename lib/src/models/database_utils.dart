@@ -1,19 +1,7 @@
-import 'package:todo_app/main.dart';
-import 'database.dart';
-
-//------------------- percentage calculation function ---------------//
-Future<int> calculatePercentage(TaskType taskType) async{
-  final tasks = await database.tasksFromType(taskType.index);
-  final completedTasks = await database.completedTasksFromType(taskType.index);
-  if(tasks.isEmpty)
-    return 0;
-  else
-    return ((completedTasks.length * 100) ~/ tasks.length);
-}
-
-//------------------- is task available ----------------------------//
-Future<bool> isTasksAvailable(TaskType taskType, DateTime date) async{
-  return (await database.tasksFromTypeAndSpecificDate(taskType.index, date)).isNotEmpty;
+enum TaskType {
+  General,
+  Work,
+  Personal,
 }
 
 //--------------------- find name of task type ----------------------//
@@ -26,4 +14,15 @@ String findNameFromTaskType(TaskType taskType){
     return 'Personal';
 
   return '';
+}
+
+TaskType findTaskType(int index){
+  if(index == 0)
+    return TaskType.Personal;
+  else if(index == 1)
+    return TaskType.Work;
+  else if(index == 2)
+    return TaskType.General;
+
+  return TaskType.Personal;
 }
