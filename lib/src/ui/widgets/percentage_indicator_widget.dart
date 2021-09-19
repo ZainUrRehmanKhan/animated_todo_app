@@ -5,10 +5,9 @@ import 'package:todo_app/src/utils/utils.dart';
 import 'package:todo_app/src/models/database_utils.dart';
 
 class PercentageIndicator extends StatefulWidget {
-  final double linearIndicatorSize;
   final TaskType? taskType;
 
-  PercentageIndicator({required this.linearIndicatorSize, this.taskType});
+  PercentageIndicator({this.taskType});
 
   @override
   _PercentageIndicatorState createState() => _PercentageIndicatorState();

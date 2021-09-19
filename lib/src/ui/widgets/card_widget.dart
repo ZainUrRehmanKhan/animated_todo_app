@@ -52,7 +52,6 @@ class CardWidget extends StatelessWidget {
               alignment: Alignment.bottomLeft,
               child: PercentageIndicator(
                 taskType: taskType,
-                linearIndicatorSize: linearIndicatorSize,
               ),
             ),
           ],

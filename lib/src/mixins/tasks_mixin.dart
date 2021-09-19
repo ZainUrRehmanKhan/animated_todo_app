@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import 'package:todo_app/src/models/database_utils.dart';
 import 'package:todo_app/src/models/task_model.dart';
+import 'package:todo_app/src/models/database_utils.dart';
 
 mixin TaskMixin {
   static late Box<Task> _box;
@@ -32,5 +32,14 @@ mixin TaskMixin {
 
   getTasksFromDate(DateTime date) {
     return _box.values.toList().map((e) => e.date == date).toList();
+  }
+
+  Map<DateTime, List<Task>> getAllTasks(TaskType type) {
+    List<Task> taskList = _box.values.toList().where((element) => element.taskType == type.index).toList();
+    Map<DateTime, List<Task>> map = {};
+    for (var task in taskList) {
+      map[task.date] = taskList.where((element) => element.date == task.date).toList();
+    }
+    return map;
   }
 }

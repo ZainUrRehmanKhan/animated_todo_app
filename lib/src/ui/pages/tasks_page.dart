@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:todo_app/src/app_data.dart';
-import 'package:todo_app/src/utils/utils.dart';
+import 'package:todo_app/src/models/database_utils.dart';
 import 'package:todo_app/src/models/task_model.dart';
 import 'package:todo_app/src/ui/pages/home_page.dart';
-import 'package:todo_app/src/models/database_utils.dart';
-import 'package:todo_app/src/ui/widgets/type_icon_widget.dart';
 import 'package:todo_app/src/ui/widgets/percentage_indicator_widget.dart';
+import 'package:todo_app/src/ui/widgets/type_icon_widget.dart';
+import 'package:todo_app/src/utils/utils.dart';
 
 class TasksPage extends StatefulWidget {
   @override
@@ -25,6 +25,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
   bool addNew = false;
   DateTime dateSelected = DateTime.now();
   late String dateText;
+  bool _validate = false;
 
   back() {
     Navigator.pop(context);
@@ -90,15 +91,16 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 GestureDetector(
-                                    child: Icon(
-                                      CupertinoIcons.arrow_left,
-                                      color: AppUtils.primaryColor,
-                                    ),
-                                    onTap: () => back()),
+                                  child: Icon(
+                                    CupertinoIcons.arrow_left,
+                                    color: AppUtils.primaryColor,
+                                  ),
+                                  onTap: () => back(),
+                                ),
                                 Icon(
                                   CupertinoIcons.ellipsis_vertical,
                                   color: AppUtils.primaryColor,
-                                )
+                                ),
                               ],
                             ),
                             Padding(
@@ -113,44 +115,41 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                                     Padding(
                                       padding: const EdgeInsets.only(
                                           top: 25, bottom: 15),
-                                      child: PercentageIndicator(
-                                        linearIndicatorSize: 0.55,
-                                      ),
+                                      child: PercentageIndicator(),
                                     ),
 
                                     // ----------Tasks------------
-                                    Text(
-                                      'Today',
-                                      style: TextStyle(
-                                          color: Colors.pinkAccent[200]),
-                                    ),
-                                    check ?
-                                    ListView.builder(
-                                      itemCount: 2,
-                                      itemBuilder: (context, index) {
-                                        return SizedBox();
-                                        ///TODO Solve this
-                                      },
-                                    ) :
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 15),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text('No Task!',
+                                    check
+                                        ? Text(
+                                            'Today',
+                                            style: TextStyle(
+                                                color: Colors.pinkAccent[200]),
+                                          )
+                                        : SizedBox(),
+                                    check
+                                        ? ListView.builder(
+                                            itemCount: 2,
+                                            itemBuilder: (context, index) {
+                                              return SizedBox();
+                                            },
+                                          )
+                                        : Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 15),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  'No Tasks!',
                                                   style: TextStyle(
-                                                      color: Colors
-                                                          .pinkAccent[400])),
-                                            ],
+                                                    color:
+                                                        Colors.pinkAccent[400],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          Divider()
-                                        ],
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
@@ -185,6 +184,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                                     ),
                                     onPressed: () {
                                       reverseAnimation();
+                                      _validate = false;
                                       setState(() {
                                         addNew = false;
                                       });
@@ -226,9 +226,16 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                                       autocorrect: true,
                                       style: TextStyle(
                                           color: Colors.black54, fontSize: 30),
+                                      onChanged: (value) {
+                                        if (_validate) setState(() {
+                                          _validate = !_validate;
+                                        });
+                                      },
                                       decoration: InputDecoration(
-                                          focusColor: AppUtils.primaryColor,
-                                          border: InputBorder.none),
+                                        focusColor: AppUtils.primaryColor,
+                                        border: InputBorder.none,
+                                        errorText: _validate ? "Enter Details to continue" : null
+                                      ),
                                       cursorColor: Colors.grey[700],
                                     ),
                                     ListTile(
@@ -262,7 +269,7 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                                           FocusScope.of(context).unfocus();
                                           dateSelected = (await showDatePicker(
                                             context: context,
-                                            initialDate: dateNow,
+                                            initialDate: dateSelected,
                                             firstDate: dateNow,
                                             lastDate: DateTime(dateNow.year + 1,
                                                 dateNow.month, dateNow.day),
@@ -305,12 +312,11 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                               date: dateSelected,
                             ),
                           );
+                          _validate = true;
                         } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomePage(),
-                              ));
+                          setState(() {
+                            _validate = true;
+                          });
                         }
                       }
                     },
@@ -318,10 +324,11 @@ class _TasksPageState extends State<TasksPage> with TickerProviderStateMixin {
                       height: 50,
                       width: _sizeAnimation.value,
                       child: Center(
-                          child: Icon(
-                        CupertinoIcons.add,
-                        color: Colors.white,
-                      )),
+                        child: Icon(
+                          CupertinoIcons.add,
+                          color: Colors.white,
+                        ),
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           end: Alignment.topRight,
